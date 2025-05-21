@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 @Entity
 public class Numbers {
     @Id
-    private int number;
+    private int num;
 
     public Numbers() {}
 }

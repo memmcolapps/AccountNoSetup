@@ -13,5 +13,5 @@ public interface AccountNoRepository extends JpaRepository<CustomerAccountNoGene
     @Query("SELECT c.serialNo FROM CustomerAccountNoGenerated c WHERE c.bookNo = ?1 ORDER BY c.serialNo DESC")
     List<String> findTopSerialByBookNo(String bookNo);
 
-    List<CustomerAccountNoGenerated> findByBookNoAndStatus(String bookNo, boolean status);
+    List<CustomerAccountNoGenerated> findAccountNoByStatusAndBUID(boolean status, String bUID);
 }

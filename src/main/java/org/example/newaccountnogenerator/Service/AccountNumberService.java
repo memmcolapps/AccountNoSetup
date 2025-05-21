@@ -2,10 +2,7 @@ package org.example.newaccountnogenerator.Service;
 
 import org.example.newaccountnogenerator.Model.CustomerAccountNoGenerated;
 import org.example.newaccountnogenerator.Model.UndertakingBookNumber;
-import org.example.newaccountnogenerator.Repository.AccountNoRepository;
-import org.example.newaccountnogenerator.Repository.BusinessUnitRepository;
-import org.example.newaccountnogenerator.Repository.NumbersRepository;
-import org.example.newaccountnogenerator.Repository.UndertakingBookNumberRepository;
+import org.example.newaccountnogenerator.Repository.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +10,7 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -22,39 +20,61 @@ public class AccountNumberService {
     private final NumbersRepository numbersRepository;
     private final BusinessUnitRepository businessUnitRepository;
     public final UndertakingBookNumberRepository undertakingBookNumberRepository;
+    public final UndertakingRepository undertakingRepository;
+    public final DistributionSubstationRepository distributionSubstationRepository;
+
 
 
     public AccountNumberService(AccountNoRepository accountNoRepository, NumbersRepository numbersRepository,
                                 BusinessUnitRepository businessUnitRepository,
-                                UndertakingBookNumberRepository undertakingBookNumberRepository) {
+                                UndertakingBookNumberRepository undertakingBookNumberRepository,
+                                UndertakingRepository undertakingRepository,
+                                DistributionSubstationRepository distributionSubstationRepository) {
         this.accountNoRepository = accountNoRepository;
         this.numbersRepository = numbersRepository;
         this.businessUnitRepository = businessUnitRepository;
         this.undertakingBookNumberRepository = undertakingBookNumberRepository;
+        this.undertakingRepository = undertakingRepository;
+        this.distributionSubstationRepository = distributionSubstationRepository;
     }
 
-    public ResponseEntity<String> generateAccountNo(String bookNo, String buid) {
+    public ResponseEntity<String> generateAccountNo(String utid, String buid, String dssID, String assetId) {
 
-        if (bookNo == null || bookNo.isEmpty() || buid == null || buid.isEmpty()) {
-            return ResponseEntity.badRequest().body("Book and BU parameters are required");
+
+        if (utid == null || utid.isEmpty() || buid == null || buid.isEmpty() || dssID == null || dssID.isEmpty()
+                || assetId == null || assetId.isEmpty()) {
+            return ResponseEntity.badRequest().body("All the parameters are required");
         }
 
-        if(!businessUnitRepository.existsByBuid(buid)){
-            return ResponseEntity.ok("Business Unit Not Found");
+        if (!businessUnitRepository.existsByBuid(buid)){
+            return ResponseEntity.badRequest().body("Business Unit Not Found");
         }
+
+        List<CustomerAccountNoGenerated> unusedAccountNo = accountNoRepository.findAccountNoByStatusAndBUID(false,buid);
+        if(!unusedAccountNo.isEmpty()){
+
+            CustomerAccountNoGenerated unusedAccountNoGenerated = unusedAccountNo.get(0);
+
+//            unusedAccountNoGenerated.setStatus(true);
+            accountNoRepository.save(unusedAccountNoGenerated);
+
+            return ResponseEntity.ok("They are still Available Unused Account Number" + unusedAccountNoGenerated.getAccountNo());
+        }
+
+        distributionSubstationRepository.findByDistributionIdAndBuid(dssID, buid).
+                orElseThrow(() -> new RuntimeException("Distribution substation not found for provided BUID"));
+
+        distributionSubstationRepository.findByFeederIDAndBuid(assetId, buid).
+                orElseThrow(() -> new RuntimeException("Asset ID not found for the provided BUID"));
+
+        undertakingRepository.findUndertakingByBuidAndUtid(buid,utid).
+                orElseThrow(() -> new RuntimeException("Undertaking ID not found for the provided BUID"));
 
         try {
 
-            List<CustomerAccountNoGenerated> unusedAccountNo = accountNoRepository.findByBookNoAndStatus(bookNo, false);
-            if(!unusedAccountNo.isEmpty()){
+            String randomTwoDigit = String.format("%02d", new Random().nextInt(99) + 1);
 
-                CustomerAccountNoGenerated unusedAccountNoGenerated = unusedAccountNo.get(0);
-
-                unusedAccountNoGenerated.setStatus(true);
-                accountNoRepository.save(unusedAccountNoGenerated);
-
-                return ResponseEntity.ok(unusedAccountNoGenerated.getAccountNo());
-            }
+            String bookNo = utid +'/'+ randomTwoDigit;
 
             if (!undertakingBookNumberRepository.existsByBookNumber(bookNo)) {
 

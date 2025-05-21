@@ -15,8 +15,9 @@ public class AccountNoController {
     }
 
     @PostMapping("/generate/account-number")
-    public ResponseEntity<String> generateAccountNo(@RequestParam String bookNo,@RequestParam String buid) {
-        return accountNumberService.generateAccountNo(bookNo, buid);
+    public ResponseEntity<String> generateAccountNo(@RequestParam String utid,@RequestParam String buid,
+            @RequestParam String dssId,@RequestParam String assetId) {
+        return accountNumberService.generateAccountNo(utid, buid, dssId, assetId);
 
     }
 
