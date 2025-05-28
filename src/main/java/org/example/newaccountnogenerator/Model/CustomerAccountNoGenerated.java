@@ -19,6 +19,7 @@ public class CustomerAccountNoGenerated {
     private String serialNo;
 
     @Id
+    @Column(name = "AccountNo")
     private String accountNo;
 
     private Date dateGenerated;
@@ -28,6 +29,12 @@ public class CustomerAccountNoGenerated {
     private String bUID;
 
     private UUID rowguid;
+
+    @Column(name = "Utid")
+    private String utid;
+
+    private String dssId;
+    private String assetId;
 
 
     public void setBookNo(String bookNo) {

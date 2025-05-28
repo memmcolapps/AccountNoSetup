@@ -3,15 +3,16 @@ package org.example.newaccountnogenerator.Service;
 import org.example.newaccountnogenerator.Model.CustomerAccountNoGenerated;
 import org.example.newaccountnogenerator.Model.UndertakingBookNumber;
 import org.example.newaccountnogenerator.Repository.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class AccountNumberService {
@@ -38,30 +39,40 @@ public class AccountNumberService {
         this.distributionSubstationRepository = distributionSubstationRepository;
     }
 
-    public ResponseEntity<String> generateAccountNo(String utid, String buid, String dssID, String assetId) {
+    public ResponseEntity<Map<String, Object>> generateAccountNo(String utid, String buid, String dssID, String assetId) {
 
+        Map<String, Object> response = new HashMap<>();
 
         if (utid == null || utid.isEmpty() || buid == null || buid.isEmpty() || dssID == null || dssID.isEmpty()
                 || assetId == null || assetId.isEmpty()) {
-            return ResponseEntity.badRequest().body("All the parameters are required");
+
+            response.put("success", false);
+            response.put("message", "All the parameters are required");
+
+            return ResponseEntity.badRequest().body(response);
         }
 
         if (!businessUnitRepository.existsByBuid(buid)){
-            return ResponseEntity.badRequest().body("Business Unit Not Found");
+            response.put("success", false);
+            response.put("message", "Business Unit does not exist");
+            return ResponseEntity.badRequest().body(response);
         }
 
-        List<CustomerAccountNoGenerated> unusedAccountNo = accountNoRepository.findAccountNoByStatusAndBUID(false,buid);
+        List<CustomerAccountNoGenerated> unusedAccountNo = accountNoRepository.findAccountNoByStatusAndBUIDAndUtid(false,buid,utid);
         if(!unusedAccountNo.isEmpty()){
 
-            CustomerAccountNoGenerated unusedAccountNoGenerated = unusedAccountNo.get(0);
+            List<String> accountNumbers = unusedAccountNo.stream()
+                    .map(CustomerAccountNoGenerated::getAccountNo)
+                    .collect(Collectors.toList());
 
-//            unusedAccountNoGenerated.setStatus(true);
-            accountNoRepository.save(unusedAccountNoGenerated);
+            response.put("code", 0);
+            response.put("message", "There is Available Unused AccountNo");
+            response.put("accountNo", accountNumbers);
 
-            return ResponseEntity.ok("They are still Available Unused Account Number" + unusedAccountNoGenerated.getAccountNo());
+            return ResponseEntity.ok(response);
         }
 
-        distributionSubstationRepository.findByDistributionIdAndBuid(dssID, buid).
+        distributionSubstationRepository.findByDistributionIDAndBuid(dssID, buid).
                 orElseThrow(() -> new RuntimeException("Distribution substation not found for provided BUID"));
 
         distributionSubstationRepository.findByFeederIDAndBuid(assetId, buid).
@@ -104,14 +115,18 @@ public class AccountNumberService {
                 if (!availableNumbers.isEmpty()) {
                     series = String.format("%03d", availableNumbers.get(0));
                 } else {
-                    return ResponseEntity.badRequest().body("No available Serial number left for bookNo.");
+                    response.put("code", 1);
+                    response.put("message", "No Available Series Found");
+                    return ResponseEntity.badRequest().body(response);
                 }
             } else if (Integer.parseInt(series) <= 998) {
                 // Increment the current series
                 int iSeries = Integer.parseInt(series) + 1;
                 series = String.format("%03d", iSeries);
             } else {
-                return ResponseEntity.badRequest().body("Invalid series number");
+                response.put("code", 1001);
+                response.put("message", "Invalid series number");
+                return ResponseEntity.badRequest().body(response);
             }
 
             String accountPart = bookNo + "/" + series;
@@ -129,7 +144,9 @@ public class AccountNumberService {
 
             // Validate account number length
             if (accountNumber.length() != 16) {
-                return ResponseEntity.badRequest().body("Generated invalid account number length");
+                response.put("success", false);
+                response.put("message", "Generated invalid account number length");
+                return ResponseEntity.badRequest().body(response);
             }
 
             CustomerAccountNoGenerated account = new CustomerAccountNoGenerated();
@@ -144,12 +161,36 @@ public class AccountNumberService {
 
             accountNoRepository.save(account);
 
-            return ResponseEntity.ok(accountNumber);
+            response.put("code", 1002);
+            response.put("message", "Account Generated Successfully");
+            response.put("accountNo", accountNumber);
+            return ResponseEntity.ok(response);
 
         } catch (NumberFormatException e) {
-            return ResponseEntity.badRequest().body("Invalid number format in series");
+            Map<String, Object> errorDetail = new HashMap<>();
+
+            errorDetail.put("timestamp", LocalDate.now().toString());
+            errorDetail.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorDetail.put("error", "Invalid number format in series");
+            errorDetail.put("message", e.getMessage());
+            errorDetail.put("path", "/api/generate-account");
+
+
+            response.put("code", 1004);
+            response.put("errorDetails", errorDetail);
+            return ResponseEntity.badRequest().body(response);
         } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("Error generating account number: " + e.getMessage());
+            Map<String, Object> errorDetail = new HashMap<>();
+
+            errorDetail.put("timestamp", LocalDate.now().toString());
+            errorDetail.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
+            errorDetail.put("error", "Error generating account number");
+            errorDetail.put("message", e.getMessage());
+            errorDetail.put("path", "/api/generate-account");
+
+            response.put("code", 1003);
+            response.put("errorDetails", errorDetail);
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 }
