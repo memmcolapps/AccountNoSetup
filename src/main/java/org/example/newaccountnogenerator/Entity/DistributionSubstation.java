@@ -1,4 +1,4 @@
-package org.example.newaccountnogenerator.Model;
+package org.example.newaccountnogenerator.Primary.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

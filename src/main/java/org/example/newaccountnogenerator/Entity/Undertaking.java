@@ -1,4 +1,4 @@
-package org.example.newaccountnogenerator.Model;
+package org.example.newaccountnogenerator.Primary.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,16 +7,19 @@ import jakarta.persistence.Id;
 import java.util.UUID;
 
 @Entity
-public class BusinessUnit {
+public class Undertaking {
 
     @Id
-    @Column(name = "BUID", nullable = false)
+    @Column(name = "UTID")
+    private String utid;
+
+    @Column(name = "BUID")
     private String buid;
 
-    @Column(name = "ZoneID", nullable = false)
+    @Column(name = "ZoneID")
     private String zoneId;
 
-    @Column(name = "Name", nullable = false)
+    @Column(name = "Name")
     private String name;
 
     @Column(name = "Address")
@@ -34,14 +37,10 @@ public class BusinessUnit {
     @Column(name = "Mobile")
     private String mobile;
 
-    @Column(name = "EMail")
+    @Column(name = "Email")
     private String email;
 
     @Column(name = "Website")
     private String website;
-
-    private String bankCode;
-    private String refCode;
-    private String buCode;
-    private UUID rowGuid;
+    private UUID rowguid;
 }

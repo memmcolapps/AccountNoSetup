@@ -1,7 +1,7 @@
 package org.example.newaccountnogenerator.Service;
 
-import org.example.newaccountnogenerator.Model.CustomerAccountNoGenerated;
-import org.example.newaccountnogenerator.Repository.AccountNoRepository;
+import org.example.newaccountnogenerator.Primary.Entity.CustomerAccountNoGenerated;
+import org.example.newaccountnogenerator.Primary.Repository.AccountNoRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Optional;
 
 @Service
-public class UnusedAccountNoSelectedService {
+public class UnusedAccountNoAvailableService {
 
     private final AccountNoRepository accountNoRepository;
 
-    public UnusedAccountNoSelectedService(AccountNoRepository accountNoRepository) {
+    public UnusedAccountNoAvailableService(AccountNoRepository accountNoRepository) {
         this.accountNoRepository = accountNoRepository;
     }
 

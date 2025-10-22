@@ -1,14 +1,12 @@
-package org.example.newaccountnogenerator.Repository;
+package org.example.newaccountnogenerator.Primary.Repository;
 
-import org.example.newaccountnogenerator.Model.CustomerAccountNoGenerated;
-import org.example.newaccountnogenerator.Model.Undertaking;
+import org.example.newaccountnogenerator.Primary.Entity.CustomerAccountNoGenerated;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import org.springframework.data.repository.query.Param;
 
 @Repository
 public interface AccountNoRepository extends JpaRepository<CustomerAccountNoGenerated, String> {
@@ -18,6 +16,6 @@ public interface AccountNoRepository extends JpaRepository<CustomerAccountNoGene
 
     List<CustomerAccountNoGenerated> findAccountNoByStatusAndBUIDAndUtid(boolean status, String bUID, String Utid);
 
-    Optional<CustomerAccountNoGenerated> findByAccountNo (String accountNo);
+    Optional<CustomerAccountNoGenerated> findTopByStatusAndBUID (boolean status, String bUID, String Utid);
 
 }

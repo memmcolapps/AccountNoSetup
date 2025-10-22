@@ -1,9 +1,8 @@
 package org.example.newaccountnogenerator.Service;
 
-import org.example.newaccountnogenerator.Model.CustomerAccountNoGenerated;
-import org.example.newaccountnogenerator.Model.UndertakingBookNumber;
+import org.example.newaccountnogenerator.Entity.CustomerAccountNoGenerated;
+import org.example.newaccountnogenerator.Entity.UndertakingBookNumber;
 import org.example.newaccountnogenerator.Repository.*;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
-public class AccountNumberService {
+public class GenerateAccountNumberService {
 
     private final AccountNoRepository accountNoRepository;
     private final NumbersRepository numbersRepository;
@@ -26,7 +25,7 @@ public class AccountNumberService {
 
 
 
-    public AccountNumberService(AccountNoRepository accountNoRepository, NumbersRepository numbersRepository,
+    public GenerateAccountNumberService(AccountNoRepository accountNoRepository, NumbersRepository numbersRepository,
                                 BusinessUnitRepository businessUnitRepository,
                                 UndertakingBookNumberRepository undertakingBookNumberRepository,
                                 UndertakingRepository undertakingRepository,
@@ -72,11 +71,11 @@ public class AccountNumberService {
             return ResponseEntity.ok(response);
         }
 
-        distributionSubstationRepository.findByDistributionIDAndBuid(dssID, buid).
+        distributionSubstationRepository.findByDistributionIDAndBuidOrUtid(dssID, buid, null).
                 orElseThrow(() -> new RuntimeException("Distribution substation not found for provided BUID"));
 
-        distributionSubstationRepository.findByFeederIDAndBuid(assetId, buid).
-                orElseThrow(() -> new RuntimeException("Asset ID not found for the provided BUID"));
+        distributionSubstationRepository.findByDistributionIDAndBuidOrUtid(dssID, buid,assetId).
+                orElseThrow(() -> new RuntimeException("Feeder ID not found for the provided Dss ID under the business hub"));
 
         undertakingRepository.findUndertakingByBuidAndUtid(buid,utid).
                 orElseThrow(() -> new RuntimeException("Undertaking ID not found for the provided BUID"));

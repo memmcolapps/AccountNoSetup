@@ -1,6 +1,6 @@
-package org.example.newaccountnogenerator.Repository;
+package org.example.newaccountnogenerator.Primary.Repository;
 
-import org.example.newaccountnogenerator.Model.Numbers;
+import org.example.newaccountnogenerator.Primary.Entity.Numbers;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
