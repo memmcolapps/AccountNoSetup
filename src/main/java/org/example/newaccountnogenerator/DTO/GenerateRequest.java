@@ -4,6 +4,7 @@ public class GenerateRequest {
     private String buid;
     private String utid;
 
+
     public String getBuid() {
         return buid;
     }

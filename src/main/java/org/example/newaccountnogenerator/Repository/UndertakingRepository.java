@@ -1,6 +1,6 @@
-package org.example.newaccountnogenerator.Primary.Repository;
+package org.example.newaccountnogenerator.Repository;
 
-import org.example.newaccountnogenerator.Primary.Entity.Undertaking;
+import org.example.newaccountnogenerator.Entity.Undertaking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

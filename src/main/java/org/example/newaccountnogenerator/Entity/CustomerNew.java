@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package org.example.newaccountnogenerator.Entity;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -20,7 +20,7 @@ public class CustomerNew {
     private String oldAccountNumber;
 
     @Column(name = "MeterNo", length = 20)
-    private String meterNo;
+    private String meterNo = null;
 
     @Column(name = "Surname", length = 50, nullable = false)
     private String surname;
@@ -62,7 +62,7 @@ public class CustomerNew {
     private Integer tariffId;
 
     @Column(name = "ArrearsBalance", precision = 18, scale = 2)
-    private BigDecimal arrearsBalance;
+    private BigDecimal arrearsBalance = BigDecimal.ZERO;
 
     @Column(name = "Mobile", length = 20)
     private String mobile;
@@ -236,4 +236,614 @@ public class CustomerNew {
     @Column(name = "BusinessType", length = 20)
     private String businessType;
 
+    @Column(name = "NewSetUpStatus")
+    private Boolean newSetUpStatus;
+
+    public String getAccountNo() {
+        return accountNo;
+    }
+
+    public void setAccountNo(String accountNo) {
+        this.accountNo = accountNo;
+    }
+
+    public String getBookNumber() {
+        return bookNumber;
+    }
+
+    public void setBookNumber(String bookNumber) {
+        this.bookNumber = bookNumber;
+    }
+
+    public String getOldAccountNumber() {
+        return oldAccountNumber;
+    }
+
+    public void setOldAccountNumber(String oldAccountNumber) {
+        this.oldAccountNumber = oldAccountNumber;
+    }
+
+    public String getMeterNo() {
+        return meterNo;
+    }
+
+    public void setMeterNo(String meterNo) {
+        this.meterNo = meterNo;
+    }
+
+    public String getSurname() {
+        return surname;
+    }
+
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getOtherNames() {
+        return otherNames;
+    }
+
+    public void setOtherNames(String otherNames) {
+        this.otherNames = otherNames;
+    }
+
+    public String getAddress1() {
+        return address1;
+    }
+
+    public void setAddress1(String address1) {
+        this.address1 = address1;
+    }
+
+    public String getAddress2() {
+        return address2;
+    }
+
+    public void setAddress2(String address2) {
+        this.address2 = address2;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getServiceAddress1() {
+        return serviceAddress1;
+    }
+
+    public void setServiceAddress1(String serviceAddress1) {
+        this.serviceAddress1 = serviceAddress1;
+    }
+
+    public String getServiceAddress2() {
+        return serviceAddress2;
+    }
+
+    public void setServiceAddress2(String serviceAddress2) {
+        this.serviceAddress2 = serviceAddress2;
+    }
+
+    public String getServiceAddressCity() {
+        return serviceAddressCity;
+    }
+
+    public void setServiceAddressCity(String serviceAddressCity) {
+        this.serviceAddressCity = serviceAddressCity;
+    }
+
+    public String getServiceAddressState() {
+        return serviceAddressState;
+    }
+
+    public void setServiceAddressState(String serviceAddressState) {
+        this.serviceAddressState = serviceAddressState;
+    }
+
+    public Integer getTariffId() {
+        return tariffId;
+    }
+
+    public void setTariffId(Integer tariffId) {
+        this.tariffId = tariffId;
+    }
+
+    public BigDecimal getArrearsBalance() {
+        return arrearsBalance;
+    }
+
+    public void setArrearsBalance(BigDecimal arrearsBalance) {
+        this.arrearsBalance = arrearsBalance;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void setMobile(String mobile) {
+        this.mobile = mobile;
+    }
+
+    public String getMethodOfIdentification() {
+        return methodOfIdentification;
+    }
+
+    public void setMethodOfIdentification(String methodOfIdentification) {
+        this.methodOfIdentification = methodOfIdentification;
+    }
+
+    public String getAcctTypeDesc() {
+        return acctTypeDesc;
+    }
+
+    public void setAcctTypeDesc(String acctTypeDesc) {
+        this.acctTypeDesc = acctTypeDesc;
+    }
+
+    public Integer getScheduleBillNo() {
+        return scheduleBillNo;
+    }
+
+    public void setScheduleBillNo(Integer scheduleBillNo) {
+        this.scheduleBillNo = scheduleBillNo;
+    }
+
+    public Boolean getVat() {
+        return vat;
+    }
+
+    public void setVat(Boolean vat) {
+        this.vat = vat;
+    }
+
+    public LocalDateTime getApplicationDate() {
+        return applicationDate;
+    }
+
+    public void setApplicationDate(LocalDateTime applicationDate) {
+        this.applicationDate = applicationDate;
+    }
+
+    public String getPlaceOfWork() {
+        return placeOfWork;
+    }
+
+    public void setPlaceOfWork(String placeOfWork) {
+        this.placeOfWork = placeOfWork;
+    }
+
+    public String getAddressOfOrganisation() {
+        return addressOfOrganisation;
+    }
+
+    public void setAddressOfOrganisation(String addressOfOrganisation) {
+        this.addressOfOrganisation = addressOfOrganisation;
+    }
+
+    public String getGisCoordinate() {
+        return gisCoordinate;
+    }
+
+    public void setGisCoordinate(String gisCoordinate) {
+        this.gisCoordinate = gisCoordinate;
+    }
+
+    public String getGuarantorName() {
+        return guarantorName;
+    }
+
+    public void setGuarantorName(String guarantorName) {
+        this.guarantorName = guarantorName;
+    }
+
+    public String getGuarantorAddress() {
+        return guarantorAddress;
+    }
+
+    public void setGuarantorAddress(String guarantorAddress) {
+        this.guarantorAddress = guarantorAddress;
+    }
+
+    public String getOrganisationCode() {
+        return organisationCode;
+    }
+
+    public void setOrganisationCode(String organisationCode) {
+        this.organisationCode = organisationCode;
+    }
+
+    public String getInstitutionCode() {
+        return institutionCode;
+    }
+
+    public void setInstitutionCode(String institutionCode) {
+        this.institutionCode = institutionCode;
+    }
+
+    public LocalDateTime getSetUpDate() {
+        return setUpDate;
+    }
+
+    public void setSetUpDate(LocalDateTime setUpDate) {
+        this.setUpDate = setUpDate;
+    }
+
+    public LocalDateTime getConnectDate() {
+        return connectDate;
+    }
+
+    public void setConnectDate(LocalDateTime connectDate) {
+        this.connectDate = connectDate;
+    }
+
+    public String getDistributionStation() {
+        return distributionStation;
+    }
+
+    public void setDistributionStation(String distributionStation) {
+        this.distributionStation = distributionStation;
+    }
+
+    public String getInjectionStation() {
+        return injectionStation;
+    }
+
+    public void setInjectionStation(String injectionStation) {
+        this.injectionStation = injectionStation;
+    }
+
+    public Integer getUpriserNo() {
+        return upriserNo;
+    }
+
+    public void setUpriserNo(Integer upriserNo) {
+        this.upriserNo = upriserNo;
+    }
+
+    public String getUtid() {
+        return utid;
+    }
+
+    public void setUtid(String utid) {
+        this.utid = utid;
+    }
+
+    public String getBuid() {
+        return buid;
+    }
+
+    public void setBuid(String buid) {
+        this.buid = buid;
+    }
+
+    public String getTransId() {
+        return transId;
+    }
+
+    public void setTransId(String transId) {
+        this.transId = transId;
+    }
+
+    public String getOperatorName() {
+        return operatorName;
+    }
+
+    public void setOperatorName(String operatorName) {
+        this.operatorName = operatorName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public Integer getAdc() {
+        return adc;
+    }
+
+    public void setAdc(Integer adc) {
+        this.adc = adc;
+    }
+
+    public BigDecimal getStoredAverage() {
+        return storedAverage;
+    }
+
+    public void setStoredAverage(BigDecimal storedAverage) {
+        this.storedAverage = storedAverage;
+    }
+
+    public String getConnectionType() {
+        return connectionType;
+    }
+
+    public void setConnectionType(String connectionType) {
+        this.connectionType = connectionType;
+    }
+
+    public Boolean getUseAdc() {
+        return useAdc;
+    }
+
+    public void setUseAdc(Boolean useAdc) {
+        this.useAdc = useAdc;
+    }
+
+    public Boolean getBulk() {
+        return isBulk;
+    }
+
+    public void setBulk(Boolean bulk) {
+        isBulk = bulk;
+    }
+
+    public String getDistributionId() {
+        return distributionId;
+    }
+
+    public void setDistributionId(String distributionId) {
+        this.distributionId = distributionId;
+    }
+
+    public LocalDateTime getNewSetupDate() {
+        return newSetupDate;
+    }
+
+    public void setNewSetupDate(LocalDateTime newSetupDate) {
+        this.newSetupDate = newSetupDate;
+    }
+
+    public UUID getRowGuid() {
+        return rowGuid;
+    }
+
+    public void setRowGuid(UUID rowGuid) {
+        this.rowGuid = rowGuid;
+    }
+
+    public Boolean getCapmi() {
+        return isCapmi;
+    }
+
+    public void setCapmi(Boolean capmi) {
+        isCapmi = capmi;
+    }
+
+    public String getOperatorEdits() {
+        return operatorEdits;
+    }
+
+    public void setOperatorEdits(String operatorEdits) {
+        this.operatorEdits = operatorEdits;
+    }
+
+    public String getOperatorEdit() {
+        return operatorEdit;
+    }
+
+    public void setOperatorEdit(String operatorEdit) {
+        this.operatorEdit = operatorEdit;
+    }
+
+    public String getCat() {
+        return cat;
+    }
+
+    public void setCat(String cat) {
+        this.cat = cat;
+    }
+
+    public Boolean getConfirmed() {
+        return isConfirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        isConfirmed = confirmed;
+    }
+
+    public String getConfirmBy() {
+        return confirmBy;
+    }
+
+    public void setConfirmBy(String confirmBy) {
+        this.confirmBy = confirmBy;
+    }
+
+    public LocalDateTime getDateConfirm() {
+        return dateConfirm;
+    }
+
+    public void setDateConfirm(LocalDateTime dateConfirm) {
+        this.dateConfirm = dateConfirm;
+    }
+
+    public String getNac() {
+        return nac;
+    }
+
+    public void setNac(String nac) {
+        this.nac = nac;
+    }
+
+    public BigDecimal getBackBalance() {
+        return backBalance;
+    }
+
+    public void setBackBalance(BigDecimal backBalance) {
+        this.backBalance = backBalance;
+    }
+
+    public String getGis() {
+        return gis;
+    }
+
+    public void setGis(String gis) {
+        this.gis = gis;
+    }
+
+    public UUID getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(UUID customerId) {
+        this.customerId = customerId;
+    }
+
+    public String getAceCustomerId() {
+        return aceCustomerId;
+    }
+
+    public void setAceCustomerId(String aceCustomerId) {
+        this.aceCustomerId = aceCustomerId;
+    }
+
+    public String getCenterId() {
+        return centerId;
+    }
+
+    public void setCenterId(String centerId) {
+        this.centerId = centerId;
+    }
+
+    public String getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
+    }
+
+    public String getUpriserId() {
+        return upriserId;
+    }
+
+    public void setUpriserId(String upriserId) {
+        this.upriserId = upriserId;
+    }
+
+    public Boolean getHasTenant() {
+        return hasTenant;
+    }
+
+    public void setHasTenant(Boolean hasTenant) {
+        this.hasTenant = hasTenant;
+    }
+
+    public String getLandLordName() {
+        return landLordName;
+    }
+
+    public void setLandLordName(String landLordName) {
+        this.landLordName = landLordName;
+    }
+
+    public String getLandLordMobileNo() {
+        return landLordMobileNo;
+    }
+
+    public void setLandLordMobileNo(String landLordMobileNo) {
+        this.landLordMobileNo = landLordMobileNo;
+    }
+
+    public String getCin() {
+        return cin;
+    }
+
+    public void setCin(String cin) {
+        this.cin = cin;
+    }
+
+    public Boolean getPrepaid() {
+        return isPrepaid;
+    }
+
+    public void setPrepaid(Boolean prepaid) {
+        isPrepaid = prepaid;
+    }
+
+    public String getMeterOem() {
+        return meterOem;
+    }
+
+    public void setMeterOem(String meterOem) {
+        this.meterOem = meterOem;
+    }
+
+    public String getLtPoleId() {
+        return ltPoleId;
+    }
+
+    public void setLtPoleId(String ltPoleId) {
+        this.ltPoleId = ltPoleId;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getMaritalStatus() {
+        return maritalStatus;
+    }
+
+    public void setMaritalStatus(String maritalStatus) {
+        this.maritalStatus = maritalStatus;
+    }
+
+    public String getBusinessType() {
+        return businessType;
+    }
+
+    public void setBusinessType(String businessType) {
+        this.businessType = businessType;
+    }
+
+    public Boolean isNewSetUpStatus() {
+        return newSetUpStatus;
+    }
+
+    public void setNewSetUpStatus(Boolean newSetUpStatus) {
+        this.newSetUpStatus = newSetUpStatus;
+    }
 }

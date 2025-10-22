@@ -1,16 +1,20 @@
 package org.example.newaccountnogenerator.Controller;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import org.example.newaccountnogenerator.DTO.AccountRequest;
+import org.example.newaccountnogenerator.DTO.GenerateRequest;
+import org.example.newaccountnogenerator.Repository.AccessGroupRepository;
+import org.example.newaccountnogenerator.Security.ProtectedEndpoint;
 import org.example.newaccountnogenerator.Service.UnusedAccountNoAvailableService;
 import org.springframework.http.HttpRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/update/unused")
+@RequestMapping("/unused/account-number/service")
 public class UnusedAccountNoAvailableController {
 
     private final UnusedAccountNoAvailableService unusedAccountNoSelectedService;
@@ -19,11 +23,30 @@ public class UnusedAccountNoAvailableController {
         this.unusedAccountNoSelectedService = unusedAccountNoSelectedService;
     }
 
-    @PostMapping("/account-number")
-    public ResponseEntity<Map<String, Object>> UpdateUnusedAccountNoSelected(@RequestBody AccountRequest accountReq) {
+    @GetMapping("/get/{accessGroupCode}/{token}")
+    @ProtectedEndpoint
+    public ResponseEntity<Map<String, Object>> UnusedAccountNoAvailable(@RequestBody GenerateRequest accountReq,
+                                                                        @PathVariable("accessGroupCode") String accessGroupCode,
+                                                                        @PathVariable("token") String token) {
+        try {
 
-        String accountNo = accountReq.getAccountNo();
+            ResponseEntity<Map<String, Object>> result = unusedAccountNoSelectedService.getUnusedAccountNumbers(accountReq);
+            return ResponseEntity.ok(result.getBody());
+        } catch (Exception e) {
+            return handleException(e);
+        }
 
-        return unusedAccountNoSelectedService.UnusedAccountNoSelected(accountNo);
     }
+
+    private ResponseEntity<Map<String, Object>> handleException(Exception e) {
+        Map<String, Object> response = new HashMap<>();
+
+        response.put("code", -1);
+        response.put("message", "An unexpected error occurred: " + e.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(response);
+    }
+
 }

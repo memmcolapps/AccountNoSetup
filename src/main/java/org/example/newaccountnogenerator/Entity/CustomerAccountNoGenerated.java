@@ -1,4 +1,4 @@
-package org.example.newaccountnogenerator.Primary.Entity;
+package org.example.newaccountnogenerator.Entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -69,4 +69,27 @@ public class CustomerAccountNoGenerated {
         return accountNo;
     }
 
+    public String getUtid() {
+        return utid;
+    }
+
+    public void setUtid(String utid) {
+        this.utid = utid;
+    }
+
+    public String getDssId() {
+        return dssId;
+    }
+
+    public void setDssId(String dssId) {
+        this.dssId = dssId;
+    }
+
+    public String getAssetId() {
+        return assetId;
+    }
+
+    public void setAssetId(String assetId) {
+        this.assetId = assetId;
+    }
 }

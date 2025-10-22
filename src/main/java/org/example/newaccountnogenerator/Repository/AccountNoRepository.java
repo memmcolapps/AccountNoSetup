@@ -1,8 +1,11 @@
-package org.example.newaccountnogenerator.Primary.Repository;
+package org.example.newaccountnogenerator.Repository;
 
-import org.example.newaccountnogenerator.Primary.Entity.CustomerAccountNoGenerated;
+import jakarta.transaction.Transactional;
+import org.example.newaccountnogenerator.Entity.CustomerAccountNoGenerated;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -14,8 +17,15 @@ public interface AccountNoRepository extends JpaRepository<CustomerAccountNoGene
     @Query("SELECT c.serialNo FROM CustomerAccountNoGenerated c WHERE c.bookNo = ?1 ORDER BY c.serialNo DESC")
     List<String> findTopSerialByBookNo(String bookNo);
 
-    List<CustomerAccountNoGenerated> findAccountNoByStatusAndBUIDAndUtid(boolean status, String bUID, String Utid);
+    @Query("SELECT a.accountNo FROM CustomerAccountNoGenerated a WHERE a.status = false AND a.bUID = :buid AND a.utid = :utid")
+    List<String> findAccountNoStatusZeroByBuidAndUtid(String buid, String utid);
 
-    Optional<CustomerAccountNoGenerated> findTopByStatusAndBUID (boolean status, String bUID, String Utid);
+    boolean existsByAccountNoAndBUID(String accountNo,String buid);
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE CustomerAccountNoGenerated c SET c.status = true WHERE c.accountNo = :accountNo AND c.bUID = :buid")
+    int updateStatusToTrueByAccountNoAndBuid(@Param("accountNo") String accountNo, @Param("buid") String buid);
+
 
 }
