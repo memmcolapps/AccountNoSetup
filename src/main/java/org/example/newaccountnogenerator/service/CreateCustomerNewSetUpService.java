@@ -5,9 +5,12 @@ import org.example.newaccountnogenerator.model.CustomerNew;
 import org.example.newaccountnogenerator.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,6 +31,8 @@ public class CreateCustomerNewSetUpService {
     private final DistributionSubstationRepository distributionSubstationRepository;
     private final TariffRepository tariffRepository;
     private final AuditLogRepository auditLogRepository;
+//    @Autowired
+    private final Map<String, JdbcTemplate> businessJdbcTemplates;
 
     public CreateCustomerNewSetUpService(CustomerNewRepository customerNewRepository,
                                          AccountNoRepository accountNoRepository,
@@ -35,7 +40,7 @@ public class CreateCustomerNewSetUpService {
                                          UndertakingRepository undertakingRepository,
                                          DistributionSubstationRepository distributionSubstationRepository,
                                          TariffRepository tariffRepository,
-                                         AuditLogRepository auditLogRepository) {
+                                         AuditLogRepository auditLogRepository, Map<String, JdbcTemplate> businessJdbcTemplates) {
         this.customerNewRepository = customerNewRepository;
         this.accountNoRepository = accountNoRepository;
         this.businessUnitRepository = businessUnitRepository;
@@ -43,8 +48,14 @@ public class CreateCustomerNewSetUpService {
         this.distributionSubstationRepository = distributionSubstationRepository;
         this.tariffRepository = tariffRepository;
         this.auditLogRepository = auditLogRepository;
+        this.businessJdbcTemplates = businessJdbcTemplates;
     }
 
+    /**
+     * Creates a new customer in the consolidated DB
+     * and replicates to its respective business unit database.
+     */
+    @Transactional("consolidatedTxManager")
     public ResponseEntity<Map<String, Object>> createCustomerNewSetUp(CustomerNew customerNew) {
         Map<String, Object> response = new HashMap<>();
 
@@ -119,7 +130,7 @@ public class CreateCustomerNewSetUpService {
             customerNew.setCustomerId(UUID.randomUUID());
             customerNew.setRowGuid(UUID.randomUUID());
 
-            customerNewRepository.save(customerNew);
+            CustomerNew saved = customerNewRepository.save(customerNew);
             accountNoRepository.updateStatusToTrueByAccountNoAndBuid(accountNumber, buid);
 
             // === Record Audit Trail ===
@@ -135,6 +146,66 @@ public class CreateCustomerNewSetUpService {
             auditLog.setBuid(buid);
             auditLog.setRowguid(UUID.randomUUID());
             auditLogRepository.save(auditLog);
+
+            // Step 2: Replicate to target BU
+            String buId = saved.getBuid();
+            JdbcTemplate targetJdbc = businessJdbcTemplates.get(buId);
+
+            if (targetJdbc != null) {
+                String sql = """
+                    INSERT INTO CustomerNew([AccountNo], [booknumber], [MeterNo], [Surname], [FirstName], [OtherNames], [Address1], 
+                        [Address2], [City], [State], [email], [ServiceAddress1], [ServiceAddress2], [ServiceAddressCity], [ServiceAddressState], [TariffID], 
+                        [ArrearsBalance], [Mobile],[Vat], [ApplicationDate], [GIScoordinate],[SetUpDate], [ConnectDate], [UTID], [BUID], [TransID], 
+                        [OperatorName],[StatusCode], [DistributionID], [NewsetupDate], [rowguid], [operatorEdits], [operatorEdit],[IsConfirmed], 
+                        [ConfirmBy], [DateConfirm], [CustomerID])
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                    """;
+
+                targetJdbc.update(sql,
+                        saved.getAccountNo(),
+                        saved.getBookNumber(),
+                        saved.getMeterNo(),
+                        saved.getSurname(),
+                        saved.getFirstName(),
+                        saved.getOtherNames(),
+                        saved.getAddress1(),
+                        saved.getAddress2(),
+                        saved.getCity(),
+                        saved.getState(),
+                        saved.getEmail(),
+                        saved.getServiceAddress1(),
+                        saved.getServiceAddress2(),
+                        saved.getServiceAddressCity(),
+                        saved.getServiceAddressState(),
+                        saved.getTariffID(),
+                        saved.getArrears(),
+                        saved.getMobile(),
+                        saved.getVat(),
+                        saved.getApplicationDate(),
+                        saved.getGisCoordinate(),
+                        saved.getSetUpDate(),
+                        saved.getConnectDate(),
+                        saved.getUtid(),
+                        saved.getBuid(),
+                        saved.getTransId(),
+                        saved.getOperatorName(),
+                        saved.getStatusCode(),
+                        saved.getDistributionID(),
+                        saved.getNewSetupDate(),
+                        saved.getRowGuid(),
+                        saved.getOperatorEdits(),
+                        saved.getOperatorEdit(),
+                        saved.getConfirmed(),
+                        saved.getConfirmBy(),
+                        saved.getDateConfirm(),
+                        saved.getCustomerId()
+                );
+
+                System.out.println("✅ Replicated customer to BU: " + buId);
+            } else {
+                System.err.println("⚠️ No JDBC Template found for business unit: " + buId);
+                throw new RuntimeException("No JDBC Template found for business unit: " + buId);
+            }
 
             // === Success Response ===
             response.put("code", 200);
