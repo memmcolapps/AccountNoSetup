@@ -49,10 +49,12 @@ public class CreateCustomerNewSetUpService {
         Map<String, Object> response = new HashMap<>();
 
         try {
+
+            System.out.println(">>>>>>>>>>>>>>>>>>: "+customerNew.getTariffID());
             String accountNumber = customerNew.getAccountNo();
             String buid = customerNew.getBuid();
-            String dssid = customerNew.getDistributionId();
-            int tariffId = customerNew.getTariffId();
+            String dssid = customerNew.getDistributionID();
+            int tariffId = customerNew.getTariffID();
             String operatorName = customerNew.getAccessGroup();
             LocalDateTime timestamp = LocalDateTime.now();
             String utid = accountNumber.substring(0,5);
@@ -123,7 +125,7 @@ public class CreateCustomerNewSetUpService {
             // === Record Audit Trail ===
             AuditLog auditLog = new AuditLog();
             auditLog.setLogId(UUID.randomUUID());
-            auditLog.setModule(8);
+            auditLog.setModule(4);
             auditLog.setTableName(CustomerNew.class.getSimpleName());
             auditLog.setKeyValue(accountNumber);
             auditLog.setFieldName("AccountNo");

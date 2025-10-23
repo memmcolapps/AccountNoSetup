@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/AccountGenerator/webresources")
+@RequestMapping("/AccountGenerator/webresources/account")
 public class CreateCustomerNewSetUpController {
 
     private final CreateCustomerNewSetUpService createCustomerNewSetUpService;
@@ -46,7 +46,7 @@ public class CreateCustomerNewSetUpController {
         }
     }
 
-    @GetMapping("/account/unused/{accessGroupCode}/{token}")
+    @GetMapping("/unused/{accessGroupCode}/{token}")
     @ProtectedEndpoint
     public ResponseEntity<Map<String, Object>> UnusedAccountNoAvailable(@RequestBody GenerateRequest accountReq,
                                                                         @PathVariable("accessGroupCode") String accessGroupCode,
@@ -61,15 +61,14 @@ public class CreateCustomerNewSetUpController {
 
     }
 
-    @PostMapping("/account/generate/{accessGroupCode}/{token}")
+    @PostMapping("/generate/{accessGroupCode}/{token}")
     @ProtectedEndpoint
     public ResponseEntity<Map<String, Object>> generateAccountNo(@RequestBody AccountGenerationRequest request,
                                                                  @PathVariable("accessGroupCode") String accessGroupCode,
                                                                  @PathVariable("token") String token) {
         try {
 
-            ResponseEntity<Map<String, Object>> result = accountNumberService.generateAccountNo(request.getUtid(),
-                    request.getBuid(), request.getDssId(), request.getAssetId());
+            ResponseEntity<Map<String, Object>> result = accountNumberService.generateAccountNo(request);
             return ResponseEntity.ok(result.getBody());
         } catch (Exception e) {
             return handleException(e);

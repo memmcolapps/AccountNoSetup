@@ -4,7 +4,7 @@ public class AccountGenerationRequest {
 
     private String utid;
     private String buid;
-    private String dssId;
+    private String dssid;
     private String assetId;
 
     public String getUtid() {
@@ -15,8 +15,8 @@ public class AccountGenerationRequest {
         return buid;
     }
 
-    public String getDssId() {
-        return dssId;
+    public String getDssid() {
+        return dssid;
     }
 
     public String getAssetId() {

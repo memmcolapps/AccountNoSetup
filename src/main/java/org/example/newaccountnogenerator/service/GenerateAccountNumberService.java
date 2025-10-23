@@ -1,5 +1,6 @@
 package org.example.newaccountnogenerator.service;
 
+import org.example.newaccountnogenerator.dto.AccountGenerationRequest;
 import org.example.newaccountnogenerator.model.CustomerAccountNoGenerated;
 import org.example.newaccountnogenerator.model.UndertakingBookNumber;
 import org.example.newaccountnogenerator.repository.*;
@@ -41,13 +42,17 @@ public class GenerateAccountNumberService {
         this.customerNewRepository = customerNewRepository;
     }
 
-    public ResponseEntity<Map<String, Object>> generateAccountNo(String utid, String buid, String dssID, String assetId) {
+    public ResponseEntity<Map<String, Object>> generateAccountNo(AccountGenerationRequest request) {
         Map<String, Object> response = new HashMap<>();
 
+        String utid = request.getUtid();
+        String buid = request.getBuid();
+        String dssid = request.getDssid();
+        String assetid = request.getAssetId();
         try {
             // === Input validation ===
             if (utid == null || utid.isEmpty() || buid == null || buid.isEmpty()
-                    || dssID == null || dssID.isEmpty() || assetId == null || assetId.isEmpty()) {
+                    || dssid == null || dssid.isEmpty() || assetid == null || assetid.isEmpty()) {
                 return buildError("All parameters (UTID, BUID, DSS_ID, AssetId) are required.", 400);
             }
 
@@ -56,10 +61,10 @@ public class GenerateAccountNumberService {
             }
 
             // === Validate DSS and Undertaking ===
-            distributionSubstationRepository.findByDistributionIDAndBuid(dssID, buid)
+            distributionSubstationRepository.findByDistributionIDAndBuid(dssid, buid)
                     .orElseThrow(() -> new RuntimeException("Distribution substation not found for provided BUID."));
 
-            distributionSubstationRepository.findByDistributionIDAndBuidOrUtid(dssID, buid, assetId)
+            distributionSubstationRepository.findByDistributionIDAndBuidOrUtid(dssid, buid, assetid)
                     .orElseThrow(() -> new RuntimeException("Feeder ID not found for the provided DSS ID under the business hub."));
 
             undertakingRepository.findUndertakingByBuidAndUtid(buid, utid)
@@ -126,8 +131,8 @@ public class GenerateAccountNumberService {
             account.setStatus(false);
             account.setUtid(utid);
             account.setbUID(buid);
-            account.setDssId(dssID);
-            account.setAssetId(assetId);
+            account.setDssId(dssid);
+            account.setAssetId(assetid);
             account.setRowguid(UUID.randomUUID());
 
             accountNoRepository.save(account);

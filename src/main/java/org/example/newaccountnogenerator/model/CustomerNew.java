@@ -59,10 +59,10 @@ public class CustomerNew {
     private String serviceAddressState;
 
     @Column(name = "TariffID", nullable = false)
-    private Integer tariffId;
+    private Integer tariffID;
 
     @Column(name = "ArrearsBalance", precision = 18, scale = 2)
-    private BigDecimal arrearsBalance = BigDecimal.ZERO;
+    private BigDecimal arrears = BigDecimal.ZERO;
 
     @Column(name = "Mobile", length = 20)
     private String mobile;
@@ -153,7 +153,7 @@ public class CustomerNew {
     private Boolean isBulk;
 
     @Column(name = "DistributionID", length = 50)
-    private String distributionId;
+    private String distributionID;
 
     @Column(name = "NewSetupDate")
     private LocalDateTime newSetupDate;
@@ -370,20 +370,20 @@ public class CustomerNew {
         this.serviceAddressState = serviceAddressState;
     }
 
-    public Integer getTariffId() {
-        return tariffId;
+    public Integer getTariffID() {
+        return tariffID;
     }
 
-    public void setTariffId(Integer tariffId) {
-        this.tariffId = tariffId;
+    public void setTariffID(Integer tariffID) {
+        this.tariffID = tariffID;
     }
 
-    public BigDecimal getArrearsBalance() {
-        return arrearsBalance;
+    public BigDecimal getArrears() {
+        return arrears;
     }
 
-    public void setArrearsBalance(BigDecimal arrearsBalance) {
-        this.arrearsBalance = arrearsBalance;
+    public void setArrears(BigDecimal arrearsBalance) {
+        this.arrears = arrears;
     }
 
     public String getMobile() {
@@ -618,12 +618,12 @@ public class CustomerNew {
         isBulk = bulk;
     }
 
-    public String getDistributionId() {
-        return distributionId;
+    public String getDistributionID() {
+        return distributionID;
     }
 
-    public void setDistributionId(String distributionId) {
-        this.distributionId = distributionId;
+    public void setDistributionID(String distributionID) {
+        this.distributionID = distributionID;
     }
 
     public LocalDateTime getNewSetupDate() {
