@@ -5,7 +5,6 @@ import org.example.newaccountnogenerator.model.CustomerNew;
 import org.example.newaccountnogenerator.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -31,7 +30,6 @@ public class CreateCustomerNewSetUpService {
     private final DistributionSubstationRepository distributionSubstationRepository;
     private final TariffRepository tariffRepository;
     private final AuditLogRepository auditLogRepository;
-//    @Autowired
     private final Map<String, JdbcTemplate> businessJdbcTemplates;
 
     public CreateCustomerNewSetUpService(CustomerNewRepository customerNewRepository,
@@ -40,7 +38,8 @@ public class CreateCustomerNewSetUpService {
                                          UndertakingRepository undertakingRepository,
                                          DistributionSubstationRepository distributionSubstationRepository,
                                          TariffRepository tariffRepository,
-                                         AuditLogRepository auditLogRepository, Map<String, JdbcTemplate> businessJdbcTemplates) {
+                                         AuditLogRepository auditLogRepository,
+                                         Map<String, JdbcTemplate> businessJdbcTemplates) {
         this.customerNewRepository = customerNewRepository;
         this.accountNoRepository = accountNoRepository;
         this.businessUnitRepository = businessUnitRepository;
@@ -51,28 +50,20 @@ public class CreateCustomerNewSetUpService {
         this.businessJdbcTemplates = businessJdbcTemplates;
     }
 
-    /**
-     * Creates a new customer in the consolidated DB
-     * and replicates to its respective business unit database.
-     */
-    @Transactional("consolidatedTxManager")
+    @Transactional(rollbackFor = Exception.class, transactionManager = "consolidatedTxManager")
     public ResponseEntity<Map<String, Object>> createCustomerNewSetUp(CustomerNew customerNew) {
         Map<String, Object> response = new HashMap<>();
-
         try {
-
-            System.out.println(">>>>>>>>>>>>>>>>>>: "+customerNew.getTariffID());
             String accountNumber = customerNew.getAccountNo();
             String buid = customerNew.getBuid();
             String dssid = customerNew.getDistributionID();
             int tariffId = customerNew.getTariffID();
             String operatorName = customerNew.getAccessGroup();
             LocalDateTime timestamp = LocalDateTime.now();
-            String utid = accountNumber.substring(0,5);
-            String bookNumber = accountNumber.substring(0,8);
-            String transId = accountNumber.substring(0,5);
+            String utid = accountNumber.substring(0, 5);
+            String bookNumber = accountNumber.substring(0, 8);
+            String transId = accountNumber.substring(0, 5);
 
-            // === Check if Customer Already Exists ===
             CustomerNew existingCustomer = customerNewRepository.findByAccountNo(accountNumber);
             boolean accountExists = accountNoRepository.existsByAccountNoAndBUID(accountNumber, buid);
 
@@ -83,27 +74,18 @@ public class CreateCustomerNewSetUpService {
                 return buildError("Account number is already assigned to an existing customer.", HttpStatus.CONFLICT);
             }
 
-            // === Validate Referential Integrity ===
             undertakingRepository.findUndertakingByBuidAndUtid(buid, utid)
                     .orElseThrow(() -> new RuntimeException("Undertaking ID not found for the provided BUID."));
 
-            if (!accountExists) {
+            if (!accountExists)
                 return buildError("The provided account number does not exist or was not generated for the specified business unit.", HttpStatus.BAD_REQUEST);
-            }
-
-            if (!distributionSubstationRepository.existsByDistributionID(dssid)) {
+            if (!distributionSubstationRepository.existsByDistributionID(dssid))
                 return buildError("Invalid Distribution ID.", HttpStatus.BAD_REQUEST);
-            }
-
-            if (!businessUnitRepository.existsByBuid(buid)) {
+            if (!businessUnitRepository.existsByBuid(buid))
                 return buildError("Invalid Business Unit.", HttpStatus.BAD_REQUEST);
-            }
-
-            if (!tariffRepository.existsByTariffId(tariffId)) {
+            if (!tariffRepository.existsByTariffId(tariffId))
                 return buildError("Invalid Tariff ID.", HttpStatus.BAD_REQUEST);
-            }
 
-            // === Populate and Save Customer Record ===
             customerNew.setStatusCode("A");
             customerNew.setAdc(50);
             customerNew.setStoredAverage(BigDecimal.valueOf(50.0));
@@ -126,14 +108,12 @@ public class CreateCustomerNewSetUpService {
             customerNew.setCity(customerNew.getServiceAddressCity());
             customerNew.setState(customerNew.getServiceAddressState());
             customerNew.setBookNumber(bookNumber);
-            customerNew.setNewSetUpStatus(false);
             customerNew.setCustomerId(UUID.randomUUID());
             customerNew.setRowGuid(UUID.randomUUID());
 
             CustomerNew saved = customerNewRepository.save(customerNew);
             accountNoRepository.updateStatusToTrueByAccountNoAndBuid(accountNumber, buid);
 
-            // === Record Audit Trail ===
             AuditLog auditLog = new AuditLog();
             auditLog.setLogId(UUID.randomUUID());
             auditLog.setModule(4);
@@ -147,67 +127,72 @@ public class CreateCustomerNewSetUpService {
             auditLog.setRowguid(UUID.randomUUID());
             auditLogRepository.save(auditLog);
 
-            // Step 2: Replicate to target BU
             String buId = saved.getBuid();
             JdbcTemplate targetJdbc = businessJdbcTemplates.get(buId);
+            if (targetJdbc == null)
+                throw new RuntimeException("No JDBC Template found for business unit: " + buId);
 
-            if (targetJdbc != null) {
-                String sql = """
-                    INSERT INTO CustomerNew([AccountNo], [booknumber], [MeterNo], [Surname], [FirstName], [OtherNames], [Address1], 
-                        [Address2], [City], [State], [email], [ServiceAddress1], [ServiceAddress2], [ServiceAddressCity], [ServiceAddressState], [TariffID], 
-                        [ArrearsBalance], [Mobile],[Vat], [ApplicationDate], [GIScoordinate],[SetUpDate], [ConnectDate], [UTID], [BUID], [TransID], 
-                        [OperatorName],[StatusCode], [DistributionID], [NewsetupDate], [rowguid], [operatorEdits], [operatorEdit],[IsConfirmed], 
-                        [ConfirmBy], [DateConfirm], [CustomerID])
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            String sql = """
+                    INSERT INTO CustomerNew(
+                        [AccountNo], [booknumber], [MeterNo], [Surname], [FirstName], [OtherNames], [Address1],
+                        [Address2], [City], [State], [email], [ServiceAddress1], [ServiceAddress2], [ServiceAddressCity],
+                        [ServiceAddressState], [TariffID], [ArrearsBalance], [Mobile], [Vat], [ApplicationDate],
+                        [GIScoordinate], [SetUpDate], [ConnectDate], [UTID], [BUID], [TransID], [OperatorName],
+                        [StatusCode], [ADC], [StoredAverage], [IsBulk], [DistributionID], [NewsetupDate], [rowguid],
+                        [IsCAPMI], [operatorEdits], [operatorEdit], [IsConfirmed], [ConfirmBy], [DateConfirm],
+                        [BackBalance], [CustomerID]
+                    )
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)                                                                 
                     """;
 
-                targetJdbc.update(sql,
-                        saved.getAccountNo(),
-                        saved.getBookNumber(),
-                        saved.getMeterNo(),
-                        saved.getSurname(),
-                        saved.getFirstName(),
-                        saved.getOtherNames(),
-                        saved.getAddress1(),
-                        saved.getAddress2(),
-                        saved.getCity(),
-                        saved.getState(),
-                        saved.getEmail(),
-                        saved.getServiceAddress1(),
-                        saved.getServiceAddress2(),
-                        saved.getServiceAddressCity(),
-                        saved.getServiceAddressState(),
-                        saved.getTariffID(),
-                        saved.getArrears(),
-                        saved.getMobile(),
-                        saved.getVat(),
-                        saved.getApplicationDate(),
-                        saved.getGisCoordinate(),
-                        saved.getSetUpDate(),
-                        saved.getConnectDate(),
-                        saved.getUtid(),
-                        saved.getBuid(),
-                        saved.getTransId(),
-                        saved.getOperatorName(),
-                        saved.getStatusCode(),
-                        saved.getDistributionID(),
-                        saved.getNewSetupDate(),
-                        saved.getRowGuid(),
-                        saved.getOperatorEdits(),
-                        saved.getOperatorEdit(),
-                        saved.getConfirmed(),
-                        saved.getConfirmBy(),
-                        saved.getDateConfirm(),
-                        saved.getCustomerId()
-                );
+            int rows = targetJdbc.update(sql,
+                    saved.getAccountNo(),
+                    saved.getBookNumber(),
+                    saved.getMeterNo(),
+                    saved.getSurname(),
+                    saved.getFirstName(),
+                    saved.getOtherNames(),
+                    saved.getAddress1(),
+                    saved.getAddress2(),
+                    saved.getCity(),
+                    saved.getState(),
+                    saved.getEmail(),
+                    saved.getServiceAddress1(),
+                    saved.getServiceAddress2(),
+                    saved.getServiceAddressCity(),
+                    saved.getServiceAddressState(),
+                    saved.getTariffID(),
+                    saved.getArrears(),
+                    saved.getMobile(),
+                    saved.getVat(),
+                    saved.getApplicationDate(),
+                    saved.getGisCoordinate(),
+                    saved.getSetUpDate(),
+                    saved.getConnectDate(),
+                    saved.getUtid(),
+                    saved.getBuid(),
+                    saved.getTransId(),
+                    saved.getOperatorName(),
+                    saved.getStatusCode(),
+                    saved.getAdc(),
+                    saved.getStoredAverage(),
+                    saved.getBulk(),
+                    saved.getDistributionID(),
+                    saved.getNewSetupDate(),
+                    saved.getRowGuid(),
+                    saved.getCapmi(),
+                    saved.getOperatorEdits(),
+                    saved.getOperatorEdit(),
+                    saved.getConfirmed(),
+                    saved.getConfirmBy(),
+                    saved.getDateConfirm(),
+                    saved.getBackBalance(),
+                    saved.getCustomerId()
+            );
 
-                System.out.println("✅ Replicated customer to BU: " + buId);
-            } else {
-                System.err.println("⚠️ No JDBC Template found for business unit: " + buId);
-                throw new RuntimeException("No JDBC Template found for business unit: " + buId);
-            }
+            if (rows <= 0)
+                throw new RuntimeException("Replication to business unit failed, transaction will rollback.");
 
-            // === Success Response ===
             response.put("code", 200);
             response.put("message", "Customer registered successfully.");
             return ResponseEntity.ok(response);
@@ -218,7 +203,6 @@ public class CreateCustomerNewSetUpService {
         }
     }
 
-    // === Reusable Error Builders ===
     private ResponseEntity<Map<String, Object>> buildError(String message, HttpStatus status) {
         Map<String, Object> error = new HashMap<>();
         error.put("code", status.value());
@@ -231,13 +215,11 @@ public class CreateCustomerNewSetUpService {
     private ResponseEntity<Map<String, Object>> buildDetailedError(String title, Exception e) {
         Map<String, Object> error = new HashMap<>();
         Map<String, Object> details = new HashMap<>();
-
         details.put("timestamp", LocalDate.now().toString());
         details.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
         details.put("error", title);
         details.put("message", e.getMessage());
         details.put("path", "/customer/new-setup/service/create");
-
         error.put("code", 1003);
         error.put("errorDetails", details);
         return ResponseEntity.internalServerError().body(error);

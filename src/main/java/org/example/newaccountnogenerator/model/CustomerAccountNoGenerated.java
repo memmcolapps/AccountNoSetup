@@ -37,9 +37,31 @@ public class CustomerAccountNoGenerated {
     private String dssId;
     private String assetId;
 
-
+    public String getBookNo() {
+        return bookNo;
+    }
     public void setBookNo(String bookNo) {
         this.bookNo = bookNo;
+    }
+
+    public String getSerialNo() {
+        return serialNo;
+    }
+
+    public LocalDateTime getDateGenerated() {
+        return dateGenerated;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public String getbUID() {
+        return bUID;
+    }
+
+    public UUID getRowguid() {
+        return rowguid;
     }
 
     public void setSerialNo(String serialNo) {

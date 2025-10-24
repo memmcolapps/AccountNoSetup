@@ -170,7 +170,7 @@ public class CustomerNew {
     @Column(name = "operatorEdit", length = 20)
     private String operatorEdit;
 
-    @Column(name = "CAT", length = 5)
+    @Column(name = "CAT", columnDefinition = "CHAR(5)")
     private String cat;
 
     @Column(name = "IsConfirmed")
