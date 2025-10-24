@@ -4,17 +4,22 @@ import org.example.newaccountnogenerator.dto.AccountGenerationRequest;
 import org.example.newaccountnogenerator.model.CustomerAccountNoGenerated;
 import org.example.newaccountnogenerator.model.UndertakingBookNumber;
 import org.example.newaccountnogenerator.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
 public class GenerateAccountNumberService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GenerateAccountNumberService.class);
 
     private final AccountNoRepository accountNoRepository;
     private final NumbersRepository numbersRepository;
@@ -23,6 +28,7 @@ public class GenerateAccountNumberService {
     private final UndertakingRepository undertakingRepository;
     private final DistributionSubstationRepository distributionSubstationRepository;
     private final CustomerNewRepository customerNewRepository;
+    private final Map<String, JdbcTemplate> businessJdbcTemplates;
 
     public GenerateAccountNumberService(
             AccountNoRepository accountNoRepository,
@@ -31,7 +37,8 @@ public class GenerateAccountNumberService {
             UndertakingBookNumberRepository undertakingBookNumberRepository,
             UndertakingRepository undertakingRepository,
             DistributionSubstationRepository distributionSubstationRepository,
-            CustomerNewRepository customerNewRepository) {
+            CustomerNewRepository customerNewRepository,
+            Map<String, JdbcTemplate> businessJdbcTemplates) {
 
         this.accountNoRepository = accountNoRepository;
         this.numbersRepository = numbersRepository;
@@ -40,8 +47,14 @@ public class GenerateAccountNumberService {
         this.undertakingRepository = undertakingRepository;
         this.distributionSubstationRepository = distributionSubstationRepository;
         this.customerNewRepository = customerNewRepository;
+        this.businessJdbcTemplates = businessJdbcTemplates;
     }
 
+    /**
+     * Generates and replicates an account number in both consolidated and business DBs.
+     * Rolls back consolidated if business insert fails.
+     */
+    @Transactional("consolidatedTxManager")
     public ResponseEntity<Map<String, Object>> generateAccountNo(AccountGenerationRequest request) {
         Map<String, Object> response = new HashMap<>();
 
@@ -49,6 +62,7 @@ public class GenerateAccountNumberService {
         String buid = request.getBuid();
         String dssid = request.getDssid();
         String assetid = request.getAssetId();
+
         try {
             // === Input validation ===
             if (utid == null || utid.isEmpty() || buid == null || buid.isEmpty()
@@ -122,7 +136,7 @@ public class GenerateAccountNumberService {
                 return buildError("Duplicate account number found. Retry.", 409);
             }
 
-            // === Save generated account number ===
+            // === Save to Consolidated DB ===
             CustomerAccountNoGenerated account = new CustomerAccountNoGenerated();
             account.setBookNo(bookNo);
             account.setSerialNo(series);
@@ -134,18 +148,44 @@ public class GenerateAccountNumberService {
             account.setDssId(dssid);
             account.setAssetId(assetid);
             account.setRowguid(UUID.randomUUID());
-
             accountNoRepository.save(account);
 
+            // === Replicate to Business DB ===
+            JdbcTemplate targetJdbc = businessJdbcTemplates.get(buid);
+
+            if (targetJdbc == null) {
+                throw new RuntimeException("No JDBC template found for business unit: " + buid);
+            }
+
+            String sql = """
+                    INSERT INTO CustomerAccountNoGenerated
+                    ([BookNo], [SerialNo], [AccountNo], [DateGenerated], [Status], [UTID],
+                     [BUID], [DssId], [AssetId], [RowGuid])
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """;
+
+            targetJdbc.update(sql,
+                    account.getBookNo(),
+                    account.getSerialNo(),
+                    account.getAccountNo(),
+                    account.getDateGenerated(),
+                    account.isStatus(),
+                    account.getUtid(),
+                    account.getbUID(),
+                    account.getDssId(),
+                    account.getAssetId(),
+                    account.getRowguid()
+            );
+
+            // === Success Response ===
             response.put("code", 200);
-            response.put("message", "Account number generated successfully. Obtain supervisor approval to finalize registration.");
+            response.put("message", "Account number generated successfully and replicated to business DB.");
             response.put("accountNumber", accountNumber);
             return ResponseEntity.ok(response);
 
-        } catch (NumberFormatException e) {
-            return buildError("Invalid number format in series: " + e.getMessage(), 500);
         } catch (Exception e) {
-            return buildError("Error generating account number: " + e.getMessage(), 500);
+            logger.error("❌ Error generating account number: {}", e.getMessage(), e);
+            throw new RuntimeException("Transaction failed: " + e.getMessage(), e); // triggers rollback
         }
     }
 
