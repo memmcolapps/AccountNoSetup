@@ -239,9 +239,6 @@ public class CustomerNew {
 //    @Column(name = "BusinessType", length = 20)
 //    private String businessType;
 
-    @Column(name = "NewSetUpStatus")
-    private Boolean newSetUpStatus;
-
     public String getAccountNo() {
         return accountNo;
     }
@@ -850,11 +847,4 @@ public class CustomerNew {
 //        this.businessType = businessType;
 //    }
 
-    public Boolean isNewSetUpStatus() {
-        return newSetUpStatus;
-    }
-
-    public void setNewSetUpStatus(Boolean newSetUpStatus) {
-        this.newSetUpStatus = newSetUpStatus;
-    }
 }

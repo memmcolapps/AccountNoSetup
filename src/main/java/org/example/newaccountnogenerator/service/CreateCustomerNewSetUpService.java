@@ -224,4 +224,6 @@ public class CreateCustomerNewSetUpService {
         error.put("errorDetails", details);
         return ResponseEntity.internalServerError().body(error);
     }
+
+
 }
