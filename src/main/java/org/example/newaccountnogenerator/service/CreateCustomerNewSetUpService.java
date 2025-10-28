@@ -2,6 +2,7 @@ package org.example.newaccountnogenerator.service;
 
 import org.example.newaccountnogenerator.model.AuditLog;
 import org.example.newaccountnogenerator.model.CustomerNew;
+import org.example.newaccountnogenerator.model.Tariff;
 import org.example.newaccountnogenerator.repository.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +67,7 @@ public class CreateCustomerNewSetUpService {
 
             CustomerNew existingCustomer = customerNewRepository.findByAccountNo(accountNumber);
             boolean accountExists = accountNoRepository.existsByAccountNoAndBUID(accountNumber, buid);
+            String accTypeDesc = tariffRepository.getAccountTypeByTariffId(tariffId);
 
             if (existingCustomer != null) {
                 if (accountExists) {
@@ -87,11 +89,13 @@ public class CreateCustomerNewSetUpService {
                 return buildError("Invalid Tariff ID.", HttpStatus.BAD_REQUEST);
 
             customerNew.setStatusCode("A");
+            customerNew.setUseAdc(true);
             customerNew.setAdc(50);
             customerNew.setStoredAverage(BigDecimal.valueOf(50.0));
             customerNew.setBulk(false);
             customerNew.setCapmi(false);
             customerNew.setConfirmed(true);
+            customerNew.setAcctTypeDesc(accTypeDesc);
             customerNew.setBackBalance(BigDecimal.ZERO);
             customerNew.setOperatorEdit(operatorName);
             customerNew.setOperatorEdits(operatorName);
@@ -136,13 +140,13 @@ public class CreateCustomerNewSetUpService {
                     INSERT INTO CustomerNew(
                         [AccountNo], [booknumber], [MeterNo], [Surname], [FirstName], [OtherNames], [Address1],
                         [Address2], [City], [State], [email], [ServiceAddress1], [ServiceAddress2], [ServiceAddressCity],
-                        [ServiceAddressState], [TariffID], [ArrearsBalance], [Mobile], [Vat], [ApplicationDate],
+                        [ServiceAddressState], [TariffID], [ArrearsBalance], [Mobile],[AcctTypeDesc], [Vat], [ApplicationDate],
                         [GIScoordinate], [SetUpDate], [ConnectDate], [UTID], [BUID], [TransID], [OperatorName],
-                        [StatusCode], [ADC], [StoredAverage], [IsBulk], [DistributionID], [NewsetupDate], [rowguid],
+                        [StatusCode], [ADC], [StoredAverage],[UseADC], [IsBulk], [DistributionID], [NewsetupDate], [rowguid],
                         [IsCAPMI], [operatorEdits], [operatorEdit], [IsConfirmed], [ConfirmBy], [DateConfirm],
                         [BackBalance], [CustomerID]
                     )
-                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)                                                                 
+                    VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)                                                                 
                     """;
 
             int rows = targetJdbc.update(sql,
@@ -164,6 +168,7 @@ public class CreateCustomerNewSetUpService {
                     saved.getTariffID(),
                     saved.getArrears(),
                     saved.getMobile(),
+                    saved.getAcctTypeDesc(),
                     saved.getVat(),
                     saved.getApplicationDate(),
                     saved.getGisCoordinate(),
@@ -176,6 +181,7 @@ public class CreateCustomerNewSetUpService {
                     saved.getStatusCode(),
                     saved.getAdc(),
                     saved.getStoredAverage(),
+                    saved.getUseAdc(),
                     saved.getBulk(),
                     saved.getDistributionID(),
                     saved.getNewSetupDate(),
@@ -192,6 +198,20 @@ public class CreateCustomerNewSetUpService {
 
             if (rows <= 0)
                 throw new RuntimeException("Replication to business unit failed, transaction will rollback.");
+
+
+            // ✅ Now update CustomerAccountNoGenerated status
+            String updateStatusSql = """
+                    UPDATE CustomerAccountNoGenerated
+                    SET status = 1
+                    WHERE AccountNo = ? AND BUID = ?
+                    """;
+
+            int updateCount = targetJdbc.update(updateStatusSql, saved.getAccountNo(), saved.getBuid());
+            if (updateCount <= 0) {
+                throw new RuntimeException("Failed to update CustomerAccountNoGenerated status on business database.");
+            }
+
 
             response.put("code", 200);
             response.put("message", "Customer registered successfully.");
