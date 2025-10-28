@@ -27,9 +27,10 @@ import java.util.Optional;
 @Component
 public class ProtectedEndpointAspect {
 
+    private static final Logger log = LoggerFactory.getLogger(ProtectedEndpointAspect.class);
+
     @Autowired
     private AccessGroupRepository accessGroupRepository;
-    private static final Logger log = LoggerFactory.getLogger(ProtectedEndpointAspect.class);
 
     @Around("@annotation(org.example.newaccountnogenerator.security.ProtectedEndpoint)")
     public Object validateAccess(ProceedingJoinPoint joinPoint) throws Throwable {
@@ -62,7 +63,7 @@ public class ProtectedEndpointAspect {
             return unauthorized("Missing access group code or token.");
         }
 
-        // Check AccessGroup + Token validity
+        // Fetch AccessGroup by accessGroupCode + token
         Optional<AccessGroup> accessGroupOpt =
                 accessGroupRepository.findByAccessGroupCodeAndToken(accessGroupCode, token);
 
@@ -77,7 +78,7 @@ public class ProtectedEndpointAspect {
             return unauthorized("Access group is inactive.");
         }
 
-        // Validate Request IP against whitelisted IPs
+        // Extract the client IP (not the server IP)
         String clientIp = getClientIp(request);
         log.info("Client IP: {}, Allowed IP1: {}, IP2: {}", clientIp, group.getRequestIp(), group.getRequestIp2());
 
@@ -90,10 +91,10 @@ public class ProtectedEndpointAspect {
 
         if (!ipAllowed) {
             log.warn("Unauthorized IP: {}", clientIp);
-            return unauthorized("Unauthorized IP. This system IP is not whitelisted for the provided Access Group.");
+            return unauthorized("Unauthorized IP. This client IP is not whitelisted for the provided Access Group.");
         }
 
-        // Authorized, continue with controller logic
+        // ✅ All checks passed — proceed
         return joinPoint.proceed();
     }
 
@@ -109,7 +110,6 @@ public class ProtectedEndpointAspect {
         if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
             ip = request.getRemoteAddr();
         } else {
-            // X-Forwarded-For can contain multiple IPs, the first is the client
             ip = ip.split(",")[0];
         }
         return ip.trim();

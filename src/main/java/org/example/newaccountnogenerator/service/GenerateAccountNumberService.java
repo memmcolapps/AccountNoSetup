@@ -179,7 +179,7 @@ public class GenerateAccountNumberService {
 
             // === Success Response ===
             response.put("code", 200);
-            response.put("message", "Account number generated successfully and replicated to business DB.");
+            response.put("message", "Account number generated successfully! Please obtain supervisor approval to finalize customer registration.");
             response.put("accountNumber", accountNumber);
             return ResponseEntity.ok(response);
 
