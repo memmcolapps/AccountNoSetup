@@ -88,7 +88,7 @@ public class CreateCustomerNewSetUpService {
             if (!tariffRepository.existsByTariffId(tariffId))
                 return buildError("Invalid Tariff ID.", HttpStatus.BAD_REQUEST);
 
-            customerNew.setStatusCode("A");
+            customerNew.setStatusCode("N");
             customerNew.setUseAdc(true);
             customerNew.setAdc(50);
             customerNew.setStoredAverage(BigDecimal.valueOf(50.0));

@@ -10,52 +10,52 @@ import java.util.UUID;
 public class CustomerNew {
 
     @Id
-    @Column(name = "AccountNo", length = 20, nullable = false)
+    @Column(name = "AccountNo", nullable = false)
     private String accountNo;
 
-    @Column(name = "booknumber", length = 10, nullable = false)
+    @Column(name = "booknumber", nullable = false)
     private String bookNumber;
 
-    @Column(name = "oldaccountnumber", length = 20)
+    @Column(name = "oldaccountnumber")
     private String oldAccountNumber;
 
-    @Column(name = "MeterNo", length = 20)
+    @Column(name = "MeterNo")
     private String meterNo = null;
 
-    @Column(name = "Surname", length = 50, nullable = false)
+    @Column(name = "Surname", nullable = false)
     private String surname;
 
-    @Column(name = "FirstName", length = 25)
+    @Column(name = "FirstName")
     private String firstName;
 
-    @Column(name = "OtherNames", length = 50)
+    @Column(name = "OtherNames")
     private String otherNames;
 
-    @Column(name = "Address1", length = 200)
+    @Column(name = "Address1")
     private String address1;
 
-    @Column(name = "Address2", length = 200)
+    @Column(name = "Address2")
     private String address2;
 
-    @Column(name = "City", length = 50)
+    @Column(name = "City")
     private String city;
 
-    @Column(name = "State", length = 50)
+    @Column(name = "State")
     private String state;
 
-    @Column(name = "email", length = 50)
+    @Column(name = "email")
     private String email;
 
-    @Column(name = "ServiceAddress1", length = 200)
+    @Column(name = "ServiceAddress1")
     private String serviceAddress1;
 
-    @Column(name = "ServiceAddress2", length = 200)
+    @Column(name = "ServiceAddress2")
     private String serviceAddress2;
 
-    @Column(name = "ServiceAddressCity", length = 50)
+    @Column(name = "ServiceAddressCity")
     private String serviceAddressCity;
 
-    @Column(name = "ServiceAddressState", length = 50)
+    @Column(name = "ServiceAddressState")
     private String serviceAddressState;
 
     @Column(name = "TariffID", nullable = false)
@@ -64,13 +64,13 @@ public class CustomerNew {
     @Column(name = "ArrearsBalance", precision = 18, scale = 2)
     private BigDecimal arrears = BigDecimal.ZERO;
 
-    @Column(name = "Mobile", length = 20)
+    @Column(name = "Mobile")
     private String mobile;
 
-    @Column(name = "MethodOfIdentification", length = 10)
+    @Column(name = "MethodOfIdentification")
     private String methodOfIdentification;
 
-    @Column(name = "AcctTypeDesc", length = 50)
+    @Column(name = "AcctTypeDesc")
     private String acctTypeDesc;
 
     @Column(name = "ScheduleBillNO")
@@ -82,25 +82,25 @@ public class CustomerNew {
     @Column(name = "ApplicationDate")
     private LocalDateTime applicationDate;
 
-    @Column(name = "PlaceOfWork", length = 50)
+    @Column(name = "PlaceOfWork")
     private String placeOfWork;
 
-    @Column(name = "AddressOfOrganisation", length = 40)
+    @Column(name = "AddressOfOrganisation")
     private String addressOfOrganisation;
 
-    @Column(name = "GIScoordinate", length = 20)
+    @Column(name = "GIScoordinate")
     private String gisCoordinate;
 
-    @Column(name = "GuarantorName", length = 50)
+    @Column(name = "GuarantorName")
     private String guarantorName;
 
-    @Column(name = "GuarantorAddress", length = 50)
+    @Column(name = "GuarantorAddress")
     private String guarantorAddress;
 
-    @Column(name = "OrganisationCode", length = 10)
+    @Column(name = "OrganisationCode")
     private String organisationCode;
 
-    @Column(name = "institutionCode", length = 10)
+    @Column(name = "institutionCode")
     private String institutionCode;
 
     @Column(name = "SetUpDate")
@@ -109,31 +109,31 @@ public class CustomerNew {
     @Column(name = "ConnectDate")
     private LocalDateTime connectDate;
 
-    @Column(name = "DistributionStation", length = 50)
+    @Column(name = "DistributionStation")
     private String distributionStation;
 
-    @Column(name = "InjectionStation", length = 10)
+    @Column(name = "InjectionStation")
     private String injectionStation;
 
     @Column(name = "UpriserNo")
     private Integer upriserNo;
 
-    @Column(name = "UTID", length = 10, nullable = false)
+    @Column(name = "UTID", nullable = false)
     private String utid;
 
-    @Column(name = "BUID", length = 5, nullable = false)
+    @Column(name = "BUID", nullable = false)
     private String buid;
 
-    @Column(name = "TransID", length = 10)
+    @Column(name = "TransID")
     private String transId;
 
-    @Column(name = "OperatorName", length = 20)
+    @Column(name = "OperatorName")
     private String operatorName;
 
-    @Column(name = "Password", length = 40)
+    @Column(name = "Password")
     private String password;
 
-    @Column(name = "StatusCode", length = 10, nullable = false)
+    @Column(name = "StatusCode", nullable = false)
     private String statusCode;
 
     @Column(name = "ADC")
@@ -152,7 +152,7 @@ public class CustomerNew {
     @Column(name = "IsBulk")
     private Boolean isBulk;
 
-    @Column(name = "DistributionID", length = 50)
+    @Column(name = "DistributionID")
     private String distributionID;
 
     @Column(name = "NewSetupDate")
@@ -164,10 +164,10 @@ public class CustomerNew {
     @Column(name = "IsCAPMI")
     private Boolean isCapmi;
 
-    @Column(name = "operatorEdits", length = 20)
+    @Column(name = "operatorEdits")
     private String operatorEdits;
 
-    @Column(name = "operatorEdit", length = 20)
+    @Column(name = "operatorEdit")
     private String operatorEdit;
 
     @Column(name = "CAT", columnDefinition = "CHAR(5)")
@@ -176,19 +176,19 @@ public class CustomerNew {
     @Column(name = "IsConfirmed")
     private Boolean isConfirmed;
 
-    @Column(name = "ConfirmBy", length = 30)
+    @Column(name = "ConfirmBy")
     private String confirmBy;
 
     @Column(name = "DateConfirm")
     private LocalDateTime dateConfirm;
 
-    @Column(name = "NAC", length = 30)
+    @Column(name = "NAC")
     private String nac;
 
     @Column(name = "BackBalance", precision = 18, scale = 2)
     private BigDecimal backBalance;
 
-    @Column(name = "GIS", length = 30)
+    @Column(name = "GIS")
     private String gis;
 
     @Column(name = "CustomerID")
